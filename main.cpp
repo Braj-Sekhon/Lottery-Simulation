@@ -7,14 +7,12 @@ using std::random_device, std::mt19937, std::uniform_int_distribution, std::cout
 const int maxNumber = 64;
 const int numbersInALottery = 5;
 
+random_device rd;
+mt19937 gen(rd());
+uniform_int_distribution<> distrib(1, maxNumber);
+
 int randNum()
 {
-    static int additive = 0;
-    random_device rd;
-    mt19937 gen(rd());
-    gen.seed(time(0)+additive);
-    uniform_int_distribution<> distrib(1, maxNumber);
-    ++additive;
     return distrib(gen);
 }
 
@@ -25,7 +23,7 @@ bool isNumberInListExcept(const lotteryDrawing &List, int Num, int IgnoreIndex);
 struct lotteryDrawing {
     int drawnNumbers[numbersInALottery];
 
-    lotteryDrawing()
+    void shuffleNumbers()
     {
         for(int i = 0; i < numbersInALottery; i++)
         {
@@ -84,6 +82,10 @@ int main()
 {
     int drawings = 0;
     int matchResults[numbersInALottery+1];
+    for(int i=0; i < numbersInALottery+1; i++)
+    {
+matchResults[i]=0;
+	   }
 
     auto listResults = [&matchResults]()
     {
@@ -93,11 +95,14 @@ int main()
         }
     };
 
+    lotteryDrawing lotto1 = lotteryDrawing();
+    lotteryDrawing lotto2 = lotteryDrawing();
+
     while(true)
     {
+        lotto1.shuffleNumbers();
+        lotto2.shuffleNumbers();
         ++drawings;
-        lotteryDrawing lotto1 = lotteryDrawing();
-        lotteryDrawing lotto2 = lotteryDrawing();
         int numOfMatches = getMatchingBetween(lotto1, lotto2);
         ++matchResults[numOfMatches];
 
