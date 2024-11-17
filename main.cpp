@@ -1,10 +1,9 @@
 #include <iostream>
 #include <random>
-#include <ctime>
 
-using std::random_device, std::mt19937, std::uniform_int_distribution, std::cout, std::time;
+using std::random_device, std::mt19937, std::uniform_int_distribution, std::cout;
 
-const int maxNumber = 64;
+const int maxNumber = 39;
 const int numbersInALottery = 5;
 
 random_device rd;
@@ -80,8 +79,8 @@ int getMatchingBetween(const lotteryDrawing &L1, const lotteryDrawing &L2)
 
 int main()
 {
-    int drawings = 0;
-    int matchResults[numbersInALottery+1];
+    unsigned long long int drawings = 0;
+    unsigned long long int matchResults[numbersInALottery+1];
     for(int i=0; i < numbersInALottery+1; i++)
     {
 matchResults[i]=0;
@@ -106,7 +105,7 @@ matchResults[i]=0;
         int numOfMatches = getMatchingBetween(lotto1, lotto2);
         ++matchResults[numOfMatches];
 
-        if(drawings%10000==0)
+        if(drawings%100000==0)
         {
             cout << "It has been " << drawings << " drawings.\n";
             listResults();
