@@ -16,6 +16,7 @@ using std::uniform_int_distribution;
 const int maxNumber = 49;
 const int numbersInALottery = 8;
 const int batching_size = 2500;
+const int threadCount = 8;
 atomic<bool> matchReached{false};
 atomic<unsigned long long int> drawings{0};
 unsigned long long int matchResults[numbersInALottery + 1]{};
@@ -136,7 +137,7 @@ void runLotteryWorker(bool announcer = false)
             local_drawings = 0;
         }
 
-        if (announcer == true && drawings % 100000 == 0)
+        if (announcer == true && drawings != 0 && drawings % 100000 == 0)
         {
             cout << "It has been " << drawings << " drawings.\n";
             listResults();
@@ -161,24 +162,23 @@ void runLotteryWorker(bool announcer = false)
 
 int main()
 {
-    thread worker1(runLotteryWorker, true);
-    thread worker2(runLotteryWorker, false);
-    thread worker3(runLotteryWorker, false);
-    thread worker4(runLotteryWorker, false);
-    thread worker5(runLotteryWorker, false);
-    thread worker6(runLotteryWorker, false);
-    thread worker7(runLotteryWorker, false);
-    thread worker8(runLotteryWorker, false);
+    for (int i = 0; i < threadCount; i++)
+    {
+        if (i == 0)
+        {
+            thread worker(runLotteryWorker, true);
+            worker.detach();
+        }
+        else
+        {
+            thread worker(runLotteryWorker, false);
+            worker.detach();
+        }
+    }
 
-    worker1.join();
-    worker2.join();
-    worker3.join();
-    worker4.join();
-    worker5.join();
-    worker6.join();
-    worker7.join();
-    worker8.join();
-
+    while (matchReached == false)
+    {
+    }
     cout << "Drawings until win: " << drawings << '\n';
     listResults();
     return 0;
