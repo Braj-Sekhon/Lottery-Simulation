@@ -110,6 +110,7 @@ void runLotteryWorker(bool announcer = false)
     unsigned int local_drawings = 0;
     unsigned int local_MatchResults[numbersInALottery + 1]{};
 
+    // Batch
     auto addToGlobalResult = [&local_MatchResults]()
     {
         lock_guard<mutex> lock(resultsMutex);
