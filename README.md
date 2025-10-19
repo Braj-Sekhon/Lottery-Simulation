@@ -9,7 +9,7 @@ The program simulates two lotteries (8 numbers each from 1-49) continuously draw
 ### How to run
 
 **BUILD:**
-``g++ ./main.cpp`
+`g++ ./main.cpp`
 **RUN:**
 `./a.out`
 
@@ -20,7 +20,3 @@ This project served me best as a testing grounds for multi-threading. I learned 
 - Multi-threading overhead can backfire drastically.
 - It's about _how_ the multi-threading is implemented using: locks for array manipulation (std::mutex), variables made for multi-threading (std::atomic), and avoid making new threads as much as possible — let all the repetitive work be handled _within_ threads, not _as_ threads.
 - There's a sweet spot with batch size and thread count, allowing for massive gains in performance.
-
-```
-
-```
