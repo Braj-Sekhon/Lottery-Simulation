@@ -13,15 +13,19 @@ using std::random_device;
 using std::thread;
 using std::uniform_int_distribution;
 
+// Parameters for the user
 const int maxNumber = 49;
 const int numbersInALottery = 8;
 const int batching_size = 2500;
 const int threadCount = 8;
+
+// Functional variables
 atomic<bool> matchReached{false};
 atomic<unsigned long long int> drawings{0};
 unsigned long long int matchResults[numbersInALottery + 1]{};
 mutex resultsMutex;
 
+// Prints out how many drawings have had a match x numbers, y numbers, ... and z numbers
 void listResults()
 {
     lock_guard<mutex> lock(resultsMutex);
@@ -31,6 +35,7 @@ void listResults()
     }
 };
 
+// Gets a random number from 1 to maxNumber
 int randNum()
 {
     thread_local random_device rd;
@@ -39,7 +44,7 @@ int randNum()
     return distrib(gen);
 }
 
-struct lotteryDrawing;
+// isNumberInListExcept is defined earlier here just to allow the function to be used within shuffleNumbers; avoids compile-time error
 
 bool isNumberInListExcept(const int *drawnNumbers, int Num, int IgnoreIndex);
 
@@ -48,6 +53,7 @@ struct lotteryDrawing
     int drawnNumbers[numbersInALottery];
 };
 
+// Takes in an integer array and randomizes each entry from index 0 to [numbersInALottery-1]
 void shuffleNumbers(int *drawnNumbers)
 {
     for (int i = 0; i < numbersInALottery; i++)
@@ -61,6 +67,7 @@ void shuffleNumbers(int *drawnNumbers)
     }
 };
 
+// Checks if a [num] is in the integer array [drawnNumbers], ignoring the index of [Ignoreindex]
 bool isNumberInListExcept(const int *drawnNumbers, int Num, int IgnoreIndex)
 {
     for (int i = 0; i < numbersInALottery; i++)
@@ -80,6 +87,7 @@ bool isNumberInListExcept(const int *drawnNumbers, int Num, int IgnoreIndex)
     return false;
 }
 
+// Checks if [Num] is in [List]
 bool isNumberInDrawing(const lotteryDrawing &List, int Num)
 {
     for (int n : List.drawnNumbers)
@@ -92,6 +100,7 @@ bool isNumberInDrawing(const lotteryDrawing &List, int Num)
     return false;
 }
 
+// Returns the # of matching numbers between [L1] and [L2]
 int getMatchingBetween(const lotteryDrawing &L1, const lotteryDrawing &L2)
 {
     int matches = 0;
@@ -105,13 +114,14 @@ int getMatchingBetween(const lotteryDrawing &L1, const lotteryDrawing &L2)
     return matches;
 }
 
+// This function is to be multi-threaded. This is what runs the actual lottery simulation. [Announcer] just says if this thread is going to be the one who announces updates like how many numbers matched.
 void runLotteryWorker(bool announcer = false)
 {
     lotteryDrawing lotto1, lotto2;
     unsigned int local_drawings = 0;
     unsigned int local_MatchResults[numbersInALottery + 1]{};
 
-    // Batch
+    // Batch updates to reduce lock contention
     auto addToGlobalResult = [&local_MatchResults]()
     {
         lock_guard<mutex> lock(resultsMutex);
@@ -122,6 +132,7 @@ void runLotteryWorker(bool announcer = false)
         }
     };
 
+    // The meat of the simulation
     while (matchReached == false)
     {
         shuffleNumbers(lotto1.drawnNumbers);
@@ -155,6 +166,7 @@ void runLotteryWorker(bool announcer = false)
             break;
         }
     }
+
     // If a different thread finds the matching thing, then we have to add the remaining local drawings and results because they're batched otherwise so this is an accurate count
     addToGlobalResult();
     drawings += local_drawings;
@@ -178,6 +190,7 @@ int main()
 
     while (matchReached == false)
     {
+        // Busy-wait until match found.
     }
     cout << "Drawings until win: " << drawings << '\n';
     listResults();
